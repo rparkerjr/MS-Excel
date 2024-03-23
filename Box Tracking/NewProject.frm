@@ -13,9 +13,17 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
+
+Private Sub UserForm_Initialize()
+   Dim maxValue
+   maxValue = WorksheetFunction.Max(Range("Work_Order_Numbers"))
+   If Not maxValue > 0 Then Exit Sub
+   Me.workOrder.Value = maxValue + 1
+End Sub
+
 Private Sub cancelButton_Click()
-NewProject.Hide
-Unload NewProject
+   NewProject.Hide
+   Unload NewProject
 End Sub
 
 Private Sub createProjectButton_Click()
@@ -25,8 +33,8 @@ Dim newList As ListObject
 Dim newPivot As PivotTable
 On Error Resume Next
 
-'Validate work order before starting
-'workOrder.Value
+If ValidateWorkOrder(workOrder.Value) = False Then GoTo Return_to_Form
+If ValidateBoxNumbers(boxRangeStart.Value, boxRangeEnd.Value) = False Then GoTo Return_to_Form
 
 Application.ScreenUpdating = False
 
@@ -34,7 +42,6 @@ Set template = ActiveWorkbook.Sheets("ClientProject")
 template.Copy Before:=Worksheets("ClientProject")
 Set newSheet = Application.ActiveSheet
 
-'Convert spaces to underscores
 Dim cleanedTabName As String
 cleanedTabName = Replace(tabName.Value, " ", "_")
 
@@ -60,16 +67,14 @@ Set newList = newSheet.ListObjects(1)
 newList.Name = "BOXES_" & UCase(cleanedTabName)
 newPivot.ChangePivotCache ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newList, Version:=xlPivotTableVersion15)
 
-'Need to generate box numbers automatically?
+Call AddBoxesToProject(newSheet, Int(boxRangeStart.Value), Int(boxRangeEnd.Value))
 
-'Dim newRow As ListRow
-'ActiveWorkbook.Worksheets("Master Tracking").ListObject("MASTER").ListRows.Add AlwaysInsert:=True
-'newRow.Range.Value = tabName.Value
-
-Application.ScreenUpdating = True
+AddRowToMaster (cleanedTabName)
 
 Unload NewProject
 
+Return_to_Form:
+Application.ScreenUpdating = True
 Set template = Nothing
 Set newSheet = Nothing
 Set newPivot = Nothing
@@ -77,3 +82,48 @@ Set newList = Nothing
 Set newRow = Nothing
 End Sub
 
+Private Function ValidateWorkOrder(workOrderNumber As String) As Boolean
+Dim workOrderList As Range
+
+If Trim(workOrder.Value) = "" Then
+    ValidateWorkOrder = False
+    MsgBox ("Please enter a Work Order Number.")
+    Exit Function
+End If
+
+'Set workOrderList = Sheets("Master Tracking").ListObjects("MASTER").ListColumns("Work Order Number").Range()
+Set workOrderList = Range("Work_Order_Numbers")
+
+With workOrderList
+    Set Rng = .Find(What:=workOrder.Value, _
+                        LookIn:=xlValues, _
+                        LookAt:=xlWhole, _
+                        SearchOrder:=xlByColumns, _
+                        SearchDirection:=xlNext, _
+                        MatchCase:=False)
+    If Not Rng Is Nothing Then
+        MsgBox ("Work order number alread exists.")
+        ValidateWorkOrder = False
+    Else
+        ValidateWorkOrder = True
+    End If
+End With
+
+End Function
+
+Private Function ValidateBoxNumbers(boxStart As String, boxEnd As String) As Boolean
+    Dim startNum As Integer
+    Dim endNum As Integer
+    startNum = Int(boxStart)
+    endNum = Int(boxEnd)
+    
+    If Not (VarType(startNum) = vbInteger And VarType(endNum) = vbInteger) Then
+        ValidateBoxNumbers = False
+    End If
+    
+    If endNum < startNum Then
+        ValidateBoxNumbers = False
+    Else
+        ValidateBoxNumbers = True
+    End If
+End Function
