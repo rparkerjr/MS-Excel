@@ -3,6 +3,10 @@ Attribute VB_Name = "FreeFlow"
 '
 'Author:        Richard Parker
 'Version:       0.9b        2024-02-13
+'               1.0         2024-03-11
+'               1.1         2024-03-12
+'               1.2         2024-03-13
+'               1.3         2024-03-23
 
 Sub RefreshAllData()
 
@@ -15,7 +19,6 @@ Sub InitNewProjectForm()
     destructList = Range("DestructStatus").Value
     Load NewProject
     NewProject.Show
-    'Unload NewProject
 End Sub
 
 Sub InitTabListing()
@@ -44,4 +47,38 @@ Public Sub PopulateTabListing()
     TabListing.tabListBox.list = sheetList
 End Sub
 
+Public Sub AddBoxesToProject(newProjectSheet As Worksheet, startNum As Integer, endNum As Integer)
+    Dim tbl As ListObject
+    Dim tblRow As ListRow
+    
+    Set tbl = newProjectSheet.ListObjects(1)
+    
+    For box = startNum To endNum
+        Set tblRow = tbl.ListRows.Add
+        tblRow.Range(1, 2).Value = box
+        tblRow.Range(1, 3).Value = "Received"
+    Next
+    
+    newProjectSheet.PivotTables("SUMMARY_PIVOT").RefreshTable
+    
+    Set tbl = Nothing
+    Set tblRow = Nothing
+End Sub
 
+Public Sub AddRowToMaster(tabName As String)
+    Dim ws As Worksheet
+    Dim tbl As ListObject
+    Dim tblRow As ListRow
+    Dim newRowProject As Range
+    
+    Set ws = Worksheets("Master Tracking")
+    Set tbl = ws.ListObjects("MASTER")
+    Set tblRow = tbl.ListRows.Add
+    tblRow.Range(1, 4).Value = tabName
+    
+    Set newRowProject = activeCell
+    
+    Set ws = Nothing
+    Set tbl = Nothing
+    Set tblRow = Nothing
+End Sub
