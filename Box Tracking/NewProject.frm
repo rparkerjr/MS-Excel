@@ -112,12 +112,12 @@ End With
 End Function
 
 Private Function ValidateBoxNumbers(boxStart As String, boxEnd As String) As Boolean
-    Dim startNum As Integer
-    Dim endNum As Integer
-    startNum = Int(boxStart)
-    endNum = Int(boxEnd)
+    Dim startNum As Long
+    Dim endNum As Long
+    startNum = CLng(boxStart)
+    endNum = CLng(boxEnd)
     
-    If Not (VarType(startNum) = vbInteger And VarType(endNum) = vbInteger) Then
+    If Not (VarType(startNum) = vbLong And VarType(endNum) = vbLong) Then
         ValidateBoxNumbers = False
     End If
     
