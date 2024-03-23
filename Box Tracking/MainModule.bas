@@ -47,7 +47,7 @@ Public Sub PopulateTabListing()
     TabListing.tabListBox.list = sheetList
 End Sub
 
-Public Sub AddBoxesToProject(newProjectSheet As Worksheet, startNum As Integer, endNum As Integer)
+Public Sub AddBoxesToProject(newProjectSheet As Worksheet, startNum As Long, endNum As Long)
     Dim tbl As ListObject
     Dim tblRow As ListRow
     
