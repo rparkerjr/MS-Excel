@@ -67,7 +67,7 @@ Set newList = newSheet.ListObjects(1)
 newList.Name = "BOXES_" & UCase(cleanedTabName)
 newPivot.ChangePivotCache ActiveWorkbook.PivotCaches.Create(SourceType:=xlDatabase, SourceData:=newList, Version:=xlPivotTableVersion15)
 
-Call AddBoxesToProject(newSheet, Int(boxRangeStart.Value), Int(boxRangeEnd.Value))
+Call AddBoxesToProject(newSheet, CLng(boxRangeStart.Value), CLng(boxRangeEnd.Value))
 
 AddRowToMaster (cleanedTabName)
 
